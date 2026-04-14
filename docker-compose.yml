@@ -1,0 +1,29 @@
+services:
+  nrd:
+    build: .
+    restart: unless-stopped
+    environment:
+      NRD_ADMIN_TOKEN: ${NRD_ADMIN_TOKEN}
+      DATABASE_URL: sqlite:///app/data/nrd.db
+      LOCAL_RELAY_WS_URL: ws://nostr-rs-relay:8080
+      LOCAL_RELAY_HTTP_URL: http://nostr-rs-relay:8080
+      NRR_DB_PATH: /app/relay-db/nostr.db
+      NRR_CONFIG_PATH: /app/config/nrr-config.toml
+      BRIDGE_INTERVAL_SECS: 30
+    volumes:
+      - ./data/nrd:/app/data
+      - ./data/nrr:/app/relay-db
+      - ./deploy:/app/config:rw
+    ports:
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      - nostr-rs-relay
+
+  nostr-rs-relay:
+    image: scsibug/nostr-rs-relay:0.8.9
+    restart: unless-stopped
+    volumes:
+      - ./data/nrr:/usr/src/app/db
+      - ./deploy/nrr-config.toml:/usr/src/app/config.toml:ro
+    ports:
+      - "127.0.0.1:7447:8080"

@@ -1,0 +1,25 @@
+[info]
+relay_url = "wss://relay.swallow-liberty.ts.net/"
+name = "Swallow Liberty Relay"
+description = "Curated relay — powered by NRD"
+contact = "mailto:you@example.com"
+
+[database]
+data_directory = "./db"
+
+[network]
+address = "0.0.0.0"
+port = 8080
+remote_ip_header = "x-forwarded-for"
+
+[limits]
+messages_per_sec = 2
+max_event_bytes = 131072
+max_ws_message_bytes = 131072
+max_ws_frame_bytes = 131072
+max_subscriptions = 20
+
+[authorization]
+pubkey_whitelist = []
+nip42_auth = false
+nip42_dms = false

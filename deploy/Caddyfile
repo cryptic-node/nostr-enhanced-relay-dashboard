@@ -1,0 +1,26 @@
+relay.swallow-liberty.ts.net {
+  encode zstd gzip
+
+  @nip11 {
+    path /
+    header Accept *application/nostr+json*
+  }
+
+  @nostr_ws {
+    path /
+    header Connection *Upgrade*
+    header Upgrade websocket
+  }
+
+  handle @nip11 {
+    reverse_proxy 127.0.0.1:7447
+  }
+
+  handle @nostr_ws {
+    reverse_proxy 127.0.0.1:7447
+  }
+
+  handle {
+    reverse_proxy 127.0.0.1:8080
+  }
+}

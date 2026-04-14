@@ -1,0 +1,82 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NERD v0.0.1</title>
+  <style>
+    body { font-family: Inter, system-ui, sans-serif; margin: 2rem; background:#0f1115; color:#e7ecf3; }
+    .card { background: #1a1f29; padding: 1rem; border-radius: 12px; margin-bottom: 1rem; }
+    .status-dot { width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:8px; }
+    .online { background: #00d084; }
+    .offline { background: #ff4d4f; }
+    button { padding: .5rem .8rem; border-radius: 8px; border: none; background: #3558ff; color: white; }
+    input, textarea { width: 100%; margin: .4rem 0; background: #0f1115; color: #e7ecf3; border: 1px solid #384152; border-radius: 8px; padding: .5rem; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  </style>
+</head>
+<body>
+  <h1>NERD v0.0.1</h1>
+  <p><span class="status-dot" id="relay-status-dot"></span><strong id="relay-name">Relay</strong> · <span id="relay-url">wss://relay.swallow-liberty.ts.net</span></p>
+
+  <div class="card">
+    <h2>Relay Operations</h2>
+    <p>Description: <span id="relay-desc">—</span></p>
+    <p>Version: <span id="relay-version">—</span></p>
+    <p>Supported NIPs: <span id="relay-nips">—</span></p>
+    <button onclick="loadRelayStatus()">Refresh now</button>
+  </div>
+
+  <div class="card">
+    <h2>Export Rules</h2>
+    <input id="rule-type" value="author" />
+    <input id="rule-value" placeholder="hex pubkey / event id / kind" />
+    <button onclick="createRule()">Create Rule</button>
+    <pre id="rules" class="mono"></pre>
+  </div>
+
+  <script>
+    const adminToken = localStorage.getItem('nrd_admin_token') || prompt('NRD admin token:');
+    localStorage.setItem('nrd_admin_token', adminToken || '');
+
+    async function loadRelayStatus() {
+      const resp = await fetch('/api/relay/status', { headers: { 'X-Admin-Token': adminToken || '' } });
+      const info = await resp.json();
+      document.getElementById('relay-name').textContent = info.name || 'NRR offline';
+      document.getElementById('relay-desc').textContent = info.description || '—';
+      document.getElementById('relay-version').textContent = info.version || '—';
+      document.getElementById('relay-nips').textContent = (info.supported_nips || []).join(', ') || '—';
+      const dot = document.getElementById('relay-status-dot');
+      dot.className = 'status-dot ' + (info.online === false ? 'offline' : 'online');
+    }
+
+    async function loadRules() {
+      const resp = await fetch('/api/relay/export-rules');
+      const body = await resp.json();
+      document.getElementById('rules').textContent = JSON.stringify(body, null, 2);
+    }
+
+    async function createRule() {
+      const body = {
+        rule_type: document.getElementById('rule-type').value,
+        rule_value: document.getElementById('rule-value').value,
+        enabled: true,
+        backfill_mode: 'future_only'
+      };
+      await fetch('/api/relay/export-rules', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Token': adminToken || ''
+        },
+        body: JSON.stringify(body)
+      });
+      await loadRules();
+    }
+
+    setInterval(loadRelayStatus, 30000);
+    loadRelayStatus();
+    loadRules();
+  </script>
+</body>
+</html>
