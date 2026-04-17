@@ -1,0 +1,159 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# nostr-rs-relay configuration for NERD (Nostr Enhanced Relay Dashboard)
+# ═══════════════════════════════════════════════════════════════════════════
+
+# ───────────────────────────────────────────────────────────────────────────
+# Relay Information (NIP-11)
+# ───────────────────────────────────────────────────────────────────────────
+[info]
+# Public WebSocket URL (update with your domain)
+relay_url = "wss://relay.example.com"
+
+# Relay name (displayed in NIP-11 info)
+name = "Enhanced Relay"
+
+# Description shown to clients
+description = "Privacy-focused Nostr relay with dashboard management"
+
+# Your npub (as hex) for relay identification
+pubkey = ""
+
+# Contact information (email, nostr address, etc.)
+contact = ""
+
+# ───────────────────────────────────────────────────────────────────────────
+# Network Settings
+# ───────────────────────────────────────────────────────────────────────────
+[network]
+# Port for WebSocket connections
+port = 7447
+
+# Bind address (127.0.0.1 for local only, 0.0.0.0 for external)
+# In Docker, use 0.0.0.0 to accept connections from dashboard
+address = "0.0.0.0"
+
+# Enable remote IP address logging
+# remote_ip_header = "x-forwarded-for"
+
+# ───────────────────────────────────────────────────────────────────────────
+# Database Configuration
+# ───────────────────────────────────────────────────────────────────────────
+[database]
+# SQLite database file location
+data_directory = "/usr/src/app/db"
+
+# Database engine (sqlite is the only option currently)
+engine = "sqlite"
+
+# ───────────────────────────────────────────────────────────────────────────
+# Authorization (NIP-42)
+# IMPORTANT: Dashboard manages AUTH policy via API
+# These are backend defaults - dashboard can override
+# ───────────────────────────────────────────────────────────────────────────
+[authorization]
+# Require AUTH for all operations (managed by dashboard)
+nip42_auth_required = false
+
+# Pubkey whitelist (managed by dashboard)
+# pubkey_whitelist = []
+
+# Domain whitelist for NIP-05 verified users
+# nip05_domain_whitelist = []
+
+# ───────────────────────────────────────────────────────────────────────────
+# Rate Limiting & Client Limits
+# ───────────────────────────────────────────────────────────────────────────
+[limits]
+# Maximum client messages per second
+messages_per_sec = 60
+
+# Maximum subscriptions per minute
+subscriptions_per_min = 20
+
+# Maximum event size in bytes (128KB)
+max_event_bytes = 131072
+
+# Maximum WebSocket message size (512KB)
+max_ws_message_bytes = 524288
+
+# Maximum concurrent subscriptions per client
+max_subscriptions = 20
+
+# Maximum filter limit per subscription
+max_filters = 10
+
+# ───────────────────────────────────────────────────────────────────────────
+# Verified Users (NIP-05)
+# ───────────────────────────────────────────────────────────────────────────
+[verified_users]
+# Mode: disabled, passive, enabled
+# - disabled: ignore NIP-05 verification
+# - passive: verify but don't enforce
+# - enabled: prioritize verified users
+mode = "passive"
+
+# Whitelist of domains (empty = allow all)
+domain_whitelist = []
+
+# How long to cache NIP-05 verification results (days)
+verify_expiration_days = 30
+
+# ───────────────────────────────────────────────────────────────────────────
+# Data Retention
+# Dashboard handles archiving - these are relay storage limits
+# ───────────────────────────────────────────────────────────────────────────
+[retention]
+# Maximum events to store (0 = unlimited)
+max_events = 5000000
+
+# Maximum database size in bytes (10GB)
+max_bytes = 10737418240
+
+# ───────────────────────────────────────────────────────────────────────────
+# Metrics & Monitoring
+# ───────────────────────────────────────────────────────────────────────────
+[diagnostics]
+# Enable tracing (for debugging)
+tracing = false
+
+# ───────────────────────────────────────────────────────────────────────────
+# Grpc Settings (for future replication/federation)
+# ───────────────────────────────────────────────────────────────────────────
+# [grpc]
+# enabled = false
+# port = 50051
+
+# ───────────────────────────────────────────────────────────────────────────
+# Pay-to-Relay (Future feature)
+# ───────────────────────────────────────────────────────────────────────────
+# [pay_to_relay]
+# enabled = false
+# admission_cost = 1000  # sats
+# cost_per_event = 0     # sats
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Notes:
+# 
+# 1. Privacy Features
+#    - DMs (kind 4), Private DMs (kind 17), and Gift Wraps (kind 1059) 
+#      are ALWAYS protected - enforced by dashboard proxy layer
+#    - Other event kinds can be protected via dashboard AUTH policy
+#
+# 2. Whitelist Management
+#    - Dashboard manages pubkey whitelist via API
+#    - Syncs with monitored_npubs table
+#
+# 3. Connection Tracking
+#    - Dashboard logs all connections and AUTH attempts
+#    - View stats in "Privacy & AUTH Controls" panel
+#
+# 4. Performance
+#    - Adjust rate limits based on your server capacity
+#    - Monitor relay_stats table for performance metrics
+#
+# 5. HTTPS Setup
+#    - Use Caddy or nginx reverse proxy for SSL/TLS
+#    - Update relay_url to wss:// when HTTPS is enabled
+#    - Example Caddyfile provided in repository
+#
+# ═══════════════════════════════════════════════════════════════════════════

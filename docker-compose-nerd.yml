@@ -1,0 +1,109 @@
+version: '3.8'
+
+services:
+  # ═══════════════════════════════════════════════════════════════════════
+  # NERD Dashboard - Web interface and API
+  # ═══════════════════════════════════════════════════════════════════════
+  nerd-dashboard:
+    build: .
+    container_name: nerd-dashboard
+    restart: unless-stopped
+    ports:
+      - "8080:8080"          # Dashboard web UI
+    volumes:
+      - relay-data:/app/data
+      - ./public:/app/public:ro
+    environment:
+      # Dashboard settings
+      - PORT=8080
+      - HOST=0.0.0.0
+      - DATABASE_PATH=/app/data/dashboard.db
+      - BACKUP_DIR=/app/data/backups
+      
+      # Security
+      - NRD_ADMIN_TOKEN=${ADMIN_TOKEN:-change-this-token}
+      
+      # Relay backend connection
+      - RELAY_BACKEND=ws://nostr-relay:7447
+      
+      # Logging
+      - RUST_LOG=info,nostr_relay_dashboard=debug
+    depends_on:
+      - nostr-relay
+    networks:
+      - nostr-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # ═══════════════════════════════════════════════════════════════════════
+  # nostr-rs-relay - Backend relay engine
+  # ═══════════════════════════════════════════════════════════════════════
+  nostr-relay:
+    image: scsibug/nostr-rs-relay:latest
+    container_name: nostr-relay-backend
+    restart: unless-stopped
+    ports:
+      - "7447:7447"          # WebSocket relay endpoint
+    volumes:
+      - relay-data:/usr/src/app/db
+      - ./relay-config.toml:/usr/src/app/config.toml:ro
+    environment:
+      # Logging level
+      - RUST_LOG=warn,nostr_rs_relay=info
+      
+      # Optional: Database URL override
+      # - DATABASE_URL=sqlite:///usr/src/app/db/nostr.db
+    networks:
+      - nostr-network
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 7447 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  # ═══════════════════════════════════════════════════════════════════════
+  # Optional: Caddy reverse proxy for HTTPS
+  # Uncomment to enable HTTPS with automatic SSL certificates
+  # ═══════════════════════════════════════════════════════════════════════
+  # caddy:
+  #   image: caddy:2-alpine
+  #   container_name: nerd-caddy
+  #   restart: unless-stopped
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #     - "443:443/udp"  # HTTP/3
+  #   volumes:
+  #     - ./Caddyfile:/etc/caddy/Caddyfile:ro
+  #     - caddy-data:/data
+  #     - caddy-config:/config
+  #   environment:
+  #     - DOMAIN=${DOMAIN:-relay.example.com}
+  #   depends_on:
+  #     - nerd-dashboard
+  #     - nostr-relay
+  #   networks:
+  #     - nostr-network
+
+# ═══════════════════════════════════════════════════════════════════════
+# Networks
+# ═══════════════════════════════════════════════════════════════════════
+networks:
+  nostr-network:
+    driver: bridge
+
+# ═══════════════════════════════════════════════════════════════════════
+# Volumes
+# ═══════════════════════════════════════════════════════════════════════
+volumes:
+  relay-data:
+    driver: local
+  # caddy-data:
+  #   driver: local
+  # caddy-config:
+  #   driver: local
