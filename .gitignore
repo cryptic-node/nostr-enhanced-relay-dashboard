@@ -1,0 +1,29 @@
+# Rust build artifacts
+/target
+**/*.rs.bk
+# Note: Cargo.lock is committed for binary crates (Rust convention)
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local data and config
+/data/
+*.db
+*.db-shm
+*.db-wal
+nerd.local.toml
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local

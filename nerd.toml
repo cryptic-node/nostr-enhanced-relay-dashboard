@@ -1,0 +1,17 @@
+# NERD Server Configuration
+# Override any value with environment variables prefixed with NERD_
+# Example: NERD_SERVER__PORT=8083
+
+[server]
+# HTTP/WebSocket bind address
+host = "0.0.0.0"
+port = 8082
+
+[database]
+# SQLite database file path. Will be created if it doesn't exist.
+path = "./data/nerd.db"
+
+[logging]
+# tracing-subscriber filter directive
+# Examples: "info", "debug", "nerd_server=debug,sqlx=warn"
+filter = "info,sqlx::query=warn"
