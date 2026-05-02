@@ -46,7 +46,7 @@ that's yours.
 NERD is part of the [`cryptic-node`](https://github.com/cryptic-node) family of
 small, self-hostable Nostr tools:
 
-- **[NRD](https://github.com/cryptic-node/nrd)** — Nostr Relay Downloader. Pulls
+- **[NRD](https://github.com/cryptic-node/nostr-relay-dashboard)** — Nostr Relay Dashboard. Pulls
   notes from public relays and archives them locally. If NERD is the relay you
   serve your data from, NRD is one of the tools that helps you collect it in
   the first place.
