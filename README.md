@@ -60,3 +60,7 @@ Apache-2.0
 If NERD is useful to you, Lightning tips are welcome.
 
 *Lightning address orchidcheetah29@primal.net and QR is QR.png*
+
+<p align="center">
+  <img src="QR.png" alt="Lightning donation QR code" width="200">
+</p>
