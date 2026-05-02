@@ -1,93 +1,62 @@
-# NERD — Nostr Enhanced Relay Dashboard
+# NERD
 
-Rust-based successor to [NRD](https://github.com/cryptic-node/nostr-relay-dashboard).
-A read-only Nostr relay dashboard and reader-archiver for backing up `npub` data
-across multiple relays.
+**A personal archival relay for Nostr.**
 
-> **Status:** v0.0.1 — pre-release / under active development.
-> NRD parity only. Write relay, NIP-42 auth, and embedded `nostr-rs-relay`
-> are deferred to v0.1.0+.
+NERD is a self-hosted Nostr relay scoped to the npubs you care about. Point any
+Nostr client at it over `wss://` and you'll get back your own data — durably
+stored, locally owned, and always available.
 
----
-
-## Features (v0.0.1)
-
-- Background sync worker — subscribes to configured relays for configured npubs
-- Read-only NIP-01 relay endpoint — query archived events via WebSocket
-- Minimal admin UI — manage npubs and relays at runtime
-- Single static binary or Docker image
+Your data. Your relay. Your client.
 
 ---
 
-## Quick start
+## What it is
 
-### From source
+NERD syncs events from upstream relays for a configured set of npubs and stores
+them locally in a SQLite database. It then serves those events back over the
+standard Nostr relay protocol (NIP-01), so any Nostr client — Damus, Amethyst,
+Primal, Nostrudel, whatever you already use — can connect to it just like any
+other relay.
 
-```bash
-git clone https://github.com/cryptic-node/nostr-enhanced-relay-dashboard
-cd nostr-enhanced-relay-dashboard
-cargo run --release
-```
+Use it to:
 
-NERD will:
-1. Read `nerd.toml` (create one from the bundled default if missing)
-2. Open `./data/nerd.db` (creating it on first run)
-3. Apply migrations and seed a default relay list
-4. Bind to `0.0.0.0:8082`
+- Back up your own Nostr history so it survives upstream relays going dark
+- Pin a friend, family member, or project npub so their notes don't disappear
+- Run a private relay you control, with no public write traffic
+- Serve a filtered, archival view of your feed to your own clients over Tailscale or LAN
 
-Visit <http://localhost:8082/health> to confirm it's running.
+## What it isn't
 
-### Docker
+**NERD is not a public relay.** It's not designed to serve strangers, handle
+high write volume, or compete with community relays like `nos.lol` or
+`relay.damus.io`.
 
-_(Coming in v0.0.1 final — Session 5 deliverable.)_
+It's a personal relay you run for yourself, scoped to the npubs you choose,
+optimized for durability and archival rather than throughput. If you're looking
+for a relay to publish your notes to the wider network, run a public relay
+instead — NERD is the thing you point your client at *after* you want a copy
+that's yours.
 
----
+## Status
 
-## Configuration
+**v0.0.1 — early development.** 
 
-NERD reads `nerd.toml` at startup. Any value can be overridden by an
-environment variable prefixed with `NERD_`, using `__` as a section
-separator:
+## Related projects
 
-```bash
-NERD_SERVER__PORT=8083 cargo run
-NERD_DATABASE__PATH=/var/lib/nerd/nerd.db cargo run
-```
+NERD is part of the [`cryptic-node`](https://github.com/cryptic-node) family of
+small, self-hostable Nostr tools:
 
-Set `RUST_LOG` to override `logging.filter` at runtime:
-
-```bash
-RUST_LOG=debug cargo run
-```
-
----
-
-## Data and security
-
-NERD stores all relay URLs and npubs in its SQLite database. The schema
-includes an `encrypted` column reserved for future use, but **app-layer
-encryption is not implemented in v0.0.1**.
-
-If your relay list contains sensitive endpoints (e.g. private Tailscale
-subdomains, home-IP-exposing URLs), use **full-disk encryption on the
-host**. This is a deliberate choice: app-layer encryption requires key
-management that conflicts with headless deployment.
-
----
-
-## Coexisting with NRD
-
-NERD is designed to run alongside NRD on the same host without conflict:
-
-- Default port: `8082` (NRD uses `8080`)
-- Default data dir: `./data/` (NRD has its own, untouched)
-- No shared state, no shared database
-
-You can run both indefinitely. A migration tool to import NRD's archive
-into NERD is planned post-v0.0.1.
-
----
+- **[NRD](https://github.com/cryptic-node/nrd)** — Nostr Relay Downloader. Pulls
+  notes from public relays and archives them locally. If NERD is the relay you
+  serve your data from, NRD is one of the tools that helps you collect it in
+  the first place.
 
 ## License
 
 Apache-2.0
+
+## Support development
+
+If NERD is useful to you, Lightning tips are welcome.
+
+*Lightning address orchidcheetah29@primal.net and QR is QR.png*
